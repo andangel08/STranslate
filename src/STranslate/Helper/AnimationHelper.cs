@@ -6,7 +6,7 @@ using STranslate.Views;
 namespace STranslate.Helper;
 
 /// <summary>
-///     Helper class for handling animations in the application.
+///     用于在应用程序中处理动画的 Helper 类。
 /// </summary>
 [Obsolete("Use the WindowAnimation in MainView.xaml.cs class instead.")]
 public class AnimationHelper

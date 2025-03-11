@@ -8,17 +8,19 @@ namespace STranslate.Helper;
 
 public class WindowHelper
 {
+    //定义窗口类名常量
     private const string WINDOW_CLASS_CONSOLE = "ConsoleWindowClass";
     private const string WINDOW_CLASS_WINTAB = "Flip3D";
     private const string WINDOW_CLASS_PROGMAN = "Progman";
     private const string WINDOW_CLASS_WORKERW = "WorkerW";
 
-
+    //定义静态变量，用于存储shell和desktop的句柄
     private static IntPtr _hwnd_shell;
     private static IntPtr _hwnd_desktop;
 
-    //Accessors for shell and desktop handlers
-    //Will set the variables once and then will return them
+    //获取shell句柄
+    //访问器用于 shell 和桌面处理程序
+    //将设置变量一次，然后返回它们
     private static IntPtr HWND_SHELL => _hwnd_shell != IntPtr.Zero ? _hwnd_shell : _hwnd_shell = GetShellWindow();
 
     private static IntPtr HWND_DESKTOP =>
@@ -60,28 +62,28 @@ public class WindowHelper
     /// <returns></returns>
     public static bool IsWindowFullscreen()
     {
-        //get current active window
+        //获取当前活动窗口
         var hWnd = GetForegroundWindow();
 
         if (hWnd.Equals(IntPtr.Zero)) return false;
 
-        //if current active window is desktop or shell, exit early
+        //如果当前活动窗口是 Desktop 或 shell，请提前退出
         if (hWnd.Equals(HWND_DESKTOP) || hWnd.Equals(HWND_SHELL)) return false;
 
         var sb = new StringBuilder(256);
         GetClassName(hWnd, sb, sb.Capacity);
         var windowClass = sb.ToString();
 
-        //for Win+Tab (Flip3D)
+        //用于 Win+Tab （Flip3D）
         if (windowClass == WINDOW_CLASS_WINTAB) return false;
 
         RECT appBounds;
         GetWindowRect(hWnd, out appBounds);
 
-        //for console (ConsoleWindowClass), we have to check for negative dimensions
+        //对于控制台 （ConsoleWindowClass），我们必须检查负维度
         if (windowClass == WINDOW_CLASS_CONSOLE) return appBounds.Top < 0 && appBounds.Bottom < 0;
 
-        //for desktop (Progman or WorkerW, depends on the system), we have to check
+        //对于桌面（Progman 或 WorkerW，取决于系统），我们必须检查
         if (windowClass is WINDOW_CLASS_PROGMAN or WINDOW_CLASS_WORKERW)
         {
             var hWndDesktop = FindWindowEx(hWnd, IntPtr.Zero, "SHELLDLL_DefView", null);
@@ -132,7 +134,7 @@ public class WindowHelper
 
 
     #region Alt Tab 页面
-
+    //定义窗口扩展样式常量
     private const int GWL_EXSTYLE = -20;
     private const int WS_EX_TOOLWINDOW = 0x00000080;
     private const int WS_EX_APPWINDOW = 0x00040000;
@@ -148,16 +150,16 @@ public class WindowHelper
 
     [DllImport("kernel32.dll", EntryPoint = "SetLastError")]
     private static extern void SetLastError(int dwErrorCode);
-
+    //设置窗口扩展样式
     private static IntPtr SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
     {
-        SetLastError(0); // Clear any existing error
+        SetLastError(0); // 清除任何现有错误
 
         if (IntPtr.Size == 4) return new IntPtr(IntSetWindowLong(hWnd, nIndex, IntPtrToInt32(dwNewLong)));
 
         return IntSetWindowLongPtr(hWnd, nIndex, dwNewLong);
     }
-
+    //将IntPtr转换为int
     private static int IntPtrToInt32(IntPtr intPtr)
     {
         return unchecked((int)intPtr.ToInt64());

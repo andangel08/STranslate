@@ -13,18 +13,21 @@ public class MicrosoftAuthUtil
     /// <returns></returns>
     public static string GetSignature(string url)
     {
+        // 生成一个随机的GUID
         string guid = Guid.NewGuid().ToString("N");
+        // 对URL进行编码
         string escapedUrl = Uri.EscapeDataString(url);
+        // 获取当前时间的字符串表示
         string dateTime = DateTimeOffset.UtcNow.ToString("ddd, dd MMM yyyy HH:mm:ssG\\MT", CultureInfo.InvariantCulture);
-
+        // 将字符串拼接并转换为字节数组
         byte[] bytes = Encoding.UTF8.GetBytes($"MSTranslatorAndroidApp{escapedUrl}{dateTime}{guid}".ToLowerInvariant());
-
+        // 使用HMACSHA256算法进行加密
         using var hmac = new HMACSHA256(PrivateKey);
         byte[] hash = hmac.ComputeHash(bytes);
-
+        // 返回加密后的字符串
         return $"MSTranslatorAndroidApp::{Convert.ToBase64String(hash)}::{dateTime}::{guid}";
     }
-
+    // 私钥
     private static readonly byte[] PrivateKey =
     [
         0xa2, 0x29, 0x3a, 0x3d, 0xd0, 0xdd, 0x32, 0x73,
